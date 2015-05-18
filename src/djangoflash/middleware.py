@@ -63,7 +63,12 @@ def _get_flash_from_storage(request):
     """Gets the flash from the storage, adds it to the given request and
     returns it. A new :class:`FlashScope` is used if the storage is empty.
     """
-    flash = storage.get(request) or FlashScope()
+    try:
+        flash = storage.get(request) or FlashScope()
+    except SuspiciousOperation:
+        # Clear the storage if the cookie has been tampered with.
+        flash = FlashScope()
+
     setattr(request, CONTEXT_VAR, flash)
     return flash
 
